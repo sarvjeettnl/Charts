@@ -70,6 +70,9 @@ open class AxisBase: ComponentBase
     /// the flag can be used to turn off the antialias for grid lines
     @objc open var gridAntialiasEnabled = true
     
+    //to add entries as string
+    @objc open var stringEntries = [String]()
+    
     /// the actual array of entries
     @objc open var entries = [Double]()
     

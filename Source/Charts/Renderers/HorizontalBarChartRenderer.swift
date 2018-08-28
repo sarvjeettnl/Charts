@@ -16,6 +16,16 @@ import CoreGraphics
     import UIKit
 #endif
 
+public struct TLAttemptGradientColor{
+    
+    var color1 = UIColor.clear
+    var color2 = UIColor.clear
+    
+    public init(color1 : UIColor, color2 : UIColor) {
+        self.color1 = color1
+        self.color2 = color2
+    }
+}
 
 open class HorizontalBarChartRenderer: BarChartRenderer
 {
@@ -234,17 +244,9 @@ open class HorizontalBarChartRenderer: BarChartRenderer
         
         let buffer = _buffers[index]
         
-        let isSingleColor = dataSet.colors.count == 1
+        let isSingleColor = false
         
-        if isSingleColor
-        {
-            context.setFillColor(dataSet.color(atIndex: 0).cgColor)
-        }
-
-        // In case the chart is stacked, we need to accomodate individual bars within accessibilityOrdereredElements
-        let isStacked = dataSet.isStacked
-        let stackSize = isStacked ? dataSet.stackSize : 1
-
+        
         for j in stride(from: 0, to: buffer.rects.count, by: 1)
         {
             let barRect = buffer.rects[j]
@@ -262,36 +264,55 @@ open class HorizontalBarChartRenderer: BarChartRenderer
             if !isSingleColor
             {
                 // Set the color for the currently drawn value. If the index is out of bounds, reuse colors.
-                context.setFillColor(dataSet.color(atIndex: j).cgColor)
+                //fix here
+                
+                let gradientColors : TLAttemptGradientColor  = (dataSet as? BarChartDataSet)!.gradientColors[j]
+                let colors : [CGColor] = [gradientColors.color1.cgColor, gradientColors.color2.cgColor]
+                
+                // 3
+                let colorSpace = CGColorSpaceCreateDeviceRGB()
+                
+                // 4
+                let colorLocations: [CGFloat] = [0.0, 0.8]
+                
+                // 5
+                let gradient = CGGradient(colorsSpace: colorSpace,
+                                          colors: colors as CFArray,
+                                          locations: colorLocations)!
+                
+                
+                let startPoint = CGPoint(x: barRect.origin.x, y: barRect.origin.y)
+                let endPoint = CGPoint(x: barRect.origin.x + barRect.width, y: barRect.origin.y)
+                
+                context.saveGState()
+                context.clip(to: [barRect])
+                context.drawLinearGradient(gradient,
+                                           start: startPoint,
+                                           end: endPoint,
+                                           options: [])
+                
+                context.restoreGState()
+                
+                //context.setFillColor(dataSet.color(atIndex: j).cgColor)
+                
+                
             }
-
-            context.fill(barRect)
-
+            
+            //   context.fill(barRect)
+            
+            
             if drawBorder
             {
                 context.setStrokeColor(borderColor.cgColor)
                 context.setLineWidth(borderWidth)
                 context.stroke(barRect)
             }
-
-            // Create and append the corresponding accessibility element to accessibilityOrderedElements (see BarChartRenderer)
-            if let chart = dataProvider as? BarChartView
-            {
-                let element = createAccessibleElement(withIndex: j,
-                                                      container: chart,
-                                                      dataSet: dataSet,
-                                                      dataSetIndex: index,
-                                                      stackSize: stackSize)
-                { (element) in
-                    element.accessibilityFrame = barRect
-                }
-
-                accessibilityOrderedElements[j/stackSize].append(element)
-            }
         }
         
         context.restoreGState()
     }
+
+    
     
     open override func prepareBarHighlight(
         x: Double,

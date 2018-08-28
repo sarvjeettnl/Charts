@@ -148,8 +148,7 @@ open class XAxisRendererHorizontalBarChart: XAxisRenderer
             
             if viewPortHandler.isInBoundsY(position.y)
             {
-                if let label = xAxis.valueFormatter?.stringForValue(xAxis.entries[i], axis: xAxis)
-                {
+                 let label = xAxis.stringEntries[i]
                     drawLabel(
                         context: context,
                         formattedLabel: label,
@@ -158,7 +157,7 @@ open class XAxisRendererHorizontalBarChart: XAxisRenderer
                         attributes: [NSAttributedStringKey.font: labelFont, NSAttributedStringKey.foregroundColor: labelTextColor],
                         anchor: anchor,
                         angleRadians: labelRotationAngleRadians)
-                }
+                
             }
         }
     }
