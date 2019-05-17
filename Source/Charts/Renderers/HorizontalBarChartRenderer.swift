@@ -27,7 +27,6 @@ public struct TLAttemptGradientColor{
     }
 }
 
-
 open class HorizontalBarChartRenderer: BarChartRenderer
 {
     private class Buffer
